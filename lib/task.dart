@@ -1,6 +1,6 @@
 import 'dart:core';
 
-import 'package:teamwork_flutter/User.dart';
+import 'package:baby/User.dart';
 
 class Task {
   final int id;
