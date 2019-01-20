@@ -33,9 +33,11 @@ class _MyHomePageState extends State<LoveDetailPage> {
     Map<String, dynamic> temp = json['love'];
 
     if (temp != null) {
+      var _love = Love.fromJson(temp);
       setState(() {
-        love = Love.fromJson(temp);
+        love = _love;
       });
+      _controller.text = _love.content;
     }
     setState(() {
       userId = json['userId'];
