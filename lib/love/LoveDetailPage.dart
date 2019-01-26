@@ -178,13 +178,13 @@ class _MyHomePageState extends State<LoveDetailPage> {
           ),
 
           // 右边按钮
-          actions: <Widget>[
-            IconButton(
-              icon: Icon(Icons.delete),
-              tooltip: "删除",
-              onPressed: _confirmDelete,
-            ),
-          ],
+//          actions: <Widget>[
+//            IconButton(
+//              icon: Icon(Icons.delete),
+//              tooltip: "删除",
+//              onPressed: _confirmDelete,
+//            ),
+//          ],
         ),
         body: SingleChildScrollView(
           child: Center(
