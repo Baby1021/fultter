@@ -18,13 +18,21 @@ class _MyHomePageState extends State<LoveDetailPage> {
   static const argumentChannel =
       const MethodChannel("app.channel.page.argument");
 
-  Love love = null;
-  String userId = null;
+  Love love;
+  String userId;
+  bool isChange = false;
 
   @override
   void initState() {
     super.initState();
+    _controller.addListener(_changeContent);
     getArgument();
+  }
+
+  void _changeContent() async {
+    setState(() {
+      isChange = true;
+    });
   }
 
   void getArgument() async {
@@ -82,6 +90,8 @@ class _MyHomePageState extends State<LoveDetailPage> {
   }
 
   void _back() async {
+    // 判断是否刷新
+    await argumentChannel.invokeMethod("setResult", {"isRefresh": isChange});
     SystemNavigator.pop();
   }
 
