@@ -69,6 +69,7 @@ class _MyHomePageState extends State<LoveDetailPage> {
   }
 
   _addLove() async {
+    showLoadingDialog();
     if (love == null) {
 //      await Service.getInstance().addLove(_controller.text, userId);
       await Service.getInstance()
@@ -76,7 +77,48 @@ class _MyHomePageState extends State<LoveDetailPage> {
     } else {
       await Service.getInstance().updateLove(love.id, _controller.text, userId);
     }
+    closeLoadingDialog();
     _back();
+  }
+
+  showLoadingDialog() {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return WillPopScope(
+            onWillPop: () {
+              return Future.value(false);
+            },
+            child: Center(
+              child: Container(
+                width: 300,
+                child: Material(
+                  borderRadius: BorderRadius.all(Radius.circular(3)),
+                  // todo 抽象自定义Flutter Dialog
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      Container(
+                        margin: EdgeInsets.all(20),
+                        child: new CircularProgressIndicator(),
+                      ),
+                      Text(
+                        "正在保存中",
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        });
+  }
+
+  closeLoadingDialog() {
+    Navigator.pop(context);
+//    new Future.delayed(const Duration(seconds: 1), () {});
   }
 
   void _confirmDelete() async {
