@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
+import 'package:path/path.dart';
 
 class Service {
   Dio http = new Dio();
@@ -11,7 +14,7 @@ class Service {
 
   Service._() {
     http.options.baseUrl = 'http://39.108.227.137:3000';
-    http.options.headers = {"Content-Type": "application/json"};
+//    http.options.baseUrl = 'http://192.168.199.201:3000';
   }
 
   getLoves() async {}
@@ -46,6 +49,24 @@ class Service {
       "/api/v1/love",
       data: {"loveId": id},
     );
+    return response.data.toString();
+  }
+
+  addLoveWithImage(List<File> images, String content, String userId) async {
+    List<UploadFileInfo> files = [];
+
+    images.forEach((f) {
+      files.add(new UploadFileInfo(f, basename(f.path)));
+    });
+
+    Map<String,dynamic> param = {"content": content, "userId": userId};
+
+    if (images.length != 0) {
+      param['images'] = files;
+    }
+
+    FormData formData = new FormData.from(param);
+    var response = await http.post("/api/v1/love/image", data: formData);
     return response.data.toString();
   }
 }

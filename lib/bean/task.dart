@@ -1,6 +1,6 @@
 import 'dart:core';
 
-import 'package:baby/User.dart';
+import 'package:baby/bean/User.dart';
 
 class Task {
   final int id;

@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:baby/bean/love.dart';
 import 'package:baby/http/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 
 class LoveDetailPage extends StatefulWidget {
   LoveDetailPage({Key key, this.title}) : super(key: key);
@@ -21,12 +23,26 @@ class _MyHomePageState extends State<LoveDetailPage> {
   Love love;
   String userId;
   bool isChange = false;
+  List<File> _images = [];
+  final TextEditingController _controller = new TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _controller.addListener(_changeContent);
     getArgument();
+  }
+
+  Future getImage() async {
+    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
+
+    if (image != null) {
+      setState(() {
+        _images.add(image);
+      });
+    } else {
+      showTestDialog("没有选择图片");
+    }
   }
 
   void _changeContent() async {
@@ -54,7 +70,9 @@ class _MyHomePageState extends State<LoveDetailPage> {
 
   _addLove() async {
     if (love == null) {
-      await Service.getInstance().addLove(_controller.text, userId);
+//      await Service.getInstance().addLove(_controller.text, userId);
+      await Service.getInstance()
+          .addLoveWithImage(_images, _controller.text, userId);
     } else {
       await Service.getInstance().updateLove(love.id, _controller.text, userId);
     }
@@ -100,7 +118,51 @@ class _MyHomePageState extends State<LoveDetailPage> {
     return Future.value(false);
   }
 
-  final TextEditingController _controller = new TextEditingController();
+  void showTestDialog(String message) {
+    showDialog(
+        context: context,
+        child: new AlertDialog(
+          content: new Text(message),
+        ));
+  }
+
+  uploadImage() async {
+    await Service.getInstance()
+        .addLoveWithImage(_images, _controller.text, userId);
+    showTestDialog("上传图片成功");
+  }
+
+  Widget buildItem(File image) {
+    return Image.file(image);
+  }
+
+  Widget generateImage() {
+    return new GridView.builder(
+      padding: const EdgeInsets.all(10.0),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        mainAxisSpacing: 10.0,
+        crossAxisSpacing: 10.0,
+      ),
+      itemCount: _images.length >= 9 ? 9 : _images.length + 1,
+      shrinkWrap: true,
+      itemBuilder: (BuildContext context, int index) {
+        if (_images.length >= 9 && index >= _images.length) {
+          return Container(
+            width: 0,
+            height: 0,
+          );
+        }
+        if (index == _images.length) {
+          return new RaisedButton(
+            onPressed: getImage,
+            child: Text("选择图片"),
+          );
+        }
+        return buildItem(_images[index]);
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -116,35 +178,38 @@ class _MyHomePageState extends State<LoveDetailPage> {
           ),
 
           // 右边按钮
-          actions: <Widget>[
-            IconButton(
-              icon: Icon(Icons.delete),
-              tooltip: "删除",
-              onPressed: _confirmDelete,
-            ),
-          ],
+//          actions: <Widget>[
+//            IconButton(
+//              icon: Icon(Icons.delete),
+//              tooltip: "删除",
+//              onPressed: _confirmDelete,
+//            ),
+//          ],
         ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: new TextField(
-                  autofocus: true,
-                  maxLines: 8,
-                  style: TextStyle(fontSize: 16.0, color: Colors.black87),
-                  cursorWidth: 1.5,
-                  controller: _controller,
-                  cursorRadius: Radius.circular(1.0),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: '你要分享什么给你家宝贝呢',
-                    hintStyle: TextStyle(),
+        body: SingleChildScrollView(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: new TextField(
+                    autofocus: true,
+                    maxLines: 8,
+                    style: TextStyle(fontSize: 16.0, color: Colors.black87),
+                    cursorWidth: 1.5,
+                    controller: _controller,
+                    cursorRadius: Radius.circular(1.0),
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: '你要分享什么给你家宝贝呢',
+                      hintStyle: TextStyle(),
+                    ),
                   ),
                 ),
-              ),
-            ],
+                generateImage()
+              ],
+            ),
           ),
         ),
         floatingActionButton: FloatingActionButton(
@@ -154,13 +219,5 @@ class _MyHomePageState extends State<LoveDetailPage> {
         ),
       ),
     );
-  }
-
-  void showTestDialog(String message) {
-    showDialog(
-        context: context,
-        child: new AlertDialog(
-          content: new Text(message),
-        ));
   }
 }
