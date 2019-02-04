@@ -4,7 +4,9 @@ import 'package:baby/love/LoveDetailPage.dart';
 
 Dio http = new Dio();
 
-void main() => runApp(MyApp());
+void main() {
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -18,4 +20,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-

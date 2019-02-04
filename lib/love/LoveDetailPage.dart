@@ -23,6 +23,7 @@ class _MyHomePageState extends State<LoveDetailPage> {
   Love love;
   String userId;
   bool isChange = false;
+  bool isRemind = false;
   List<File> _images = [];
   final TextEditingController _controller = new TextEditingController();
 
@@ -69,14 +70,56 @@ class _MyHomePageState extends State<LoveDetailPage> {
   }
 
   _addLove() async {
+    showLoadingDialog();
     if (love == null) {
 //      await Service.getInstance().addLove(_controller.text, userId);
       await Service.getInstance()
-          .addLoveWithImage(_images, _controller.text, userId);
+          .addLoveWithImage(_images, _controller.text, userId, isRemind);
     } else {
       await Service.getInstance().updateLove(love.id, _controller.text, userId);
     }
+    closeLoadingDialog();
     _back();
+  }
+
+  showLoadingDialog() {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return WillPopScope(
+            onWillPop: () {
+              return Future.value(false);
+            },
+            child: Center(
+              child: Container(
+                width: 300,
+                child: Material(
+                  borderRadius: BorderRadius.all(Radius.circular(3)),
+                  // todo 抽象自定义Flutter Dialog
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      Container(
+                        margin: EdgeInsets.all(20),
+                        child: new CircularProgressIndicator(),
+                      ),
+                      Text(
+                        "正在保存中",
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        });
+  }
+
+  closeLoadingDialog() {
+    Navigator.pop(context);
+//    new Future.delayed(const Duration(seconds: 1), () {});
   }
 
   void _confirmDelete() async {
@@ -124,12 +167,6 @@ class _MyHomePageState extends State<LoveDetailPage> {
         child: new AlertDialog(
           content: new Text(message),
         ));
-  }
-
-  uploadImage() async {
-    await Service.getInstance()
-        .addLoveWithImage(_images, _controller.text, userId);
-    showTestDialog("上传图片成功");
   }
 
   Widget buildItem(File image) {
@@ -195,8 +232,11 @@ class _MyHomePageState extends State<LoveDetailPage> {
                   padding: const EdgeInsets.all(8.0),
                   child: new TextField(
                     autofocus: true,
-                    maxLines: 8,
-                    style: TextStyle(fontSize: 16.0, color: Colors.black87),
+                    maxLines: 6,
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      color: Colors.black87,
+                    ),
                     cursorWidth: 1.5,
                     controller: _controller,
                     cursorRadius: Radius.circular(1.0),
@@ -206,6 +246,47 @@ class _MyHomePageState extends State<LoveDetailPage> {
                       hintStyle: TextStyle(),
                     ),
                   ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          isRemind = !isRemind;
+                        });
+                      },
+                      child: Container(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min, // wrap_content
+                          children: <Widget>[
+                            Checkbox(
+                              value: isRemind,
+                              onChanged: (value) {
+                                setState(() {
+                                  isRemind = value;
+                                });
+                              },
+                            ),
+                            Text("是否提醒你的宝贝查看"),
+                            InkWell(
+                              onTap: () {
+                                showTestDialog("宝贝进入首页之后，弹窗提醒你发布的Love");
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(4.0),
+                                child: Icon(
+                                  Icons.help_outline,
+                                  color: Colors.black26,
+                                  size: 16,
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 generateImage()
               ],
