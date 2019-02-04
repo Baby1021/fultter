@@ -14,7 +14,6 @@ class Service {
 
   Service._() {
     http.options.baseUrl = 'http://39.108.227.137:3000';
-//    http.options.baseUrl = 'http://192.168.199.201:3000';
   }
 
   getLoves() async {}
@@ -52,14 +51,19 @@ class Service {
     return response.data.toString();
   }
 
-  addLoveWithImage(List<File> images, String content, String userId) async {
+  addLoveWithImage(
+      List<File> images, String content, String userId, bool remind) async {
     List<UploadFileInfo> files = [];
 
     images.forEach((f) {
       files.add(new UploadFileInfo(f, basename(f.path)));
     });
 
-    Map<String,dynamic> param = {"content": content, "userId": userId};
+    Map<String, dynamic> param = {
+      "content": content,
+      "userId": userId,
+      "remind": remind
+    };
 
     if (images.length != 0) {
       param['images'] = files;
