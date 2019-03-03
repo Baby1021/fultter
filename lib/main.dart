@@ -32,7 +32,7 @@ Widget findRoute(String name) {
       return TakeCasePage();
     default:
       return Center(
-        child: Text('Unknown route: $name', textDirection: TextDirection.ltr),
+        child: Text('错误路径: $name', textDirection: TextDirection.ltr),
       );
   }
 }
